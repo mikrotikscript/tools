@@ -174,7 +174,7 @@
         <header class="header">
              <h1><i class="fas fa-calculator"></i> MikroTik Burst Limit Calculator</h1>
             <p>Kalkulator sederhana untuk menghitung parameter burst pada Simple Queue.</p>
-            <a href="https://mikrotikscript.github.io/tools/"><i class="fas fa-arrow-left"></i> Kembali ke Halaman Utama</a>
+            <a href="https://mikrotikscript.github.io/tool/"><i class="fas fa-arrow-left"></i> Kembali ke Halaman Utama</a>
         </header>
 
         <div class="calculator-layout">
@@ -235,54 +235,4 @@
             const burstTime = parseInt(document.getElementById('burst-time').value) || 0;
 
             // Convert to bps
-            const maxLimitBps = maxLimitValue * (maxLimitUnit === 'M' ? 1000000 : 1000);
-            const burstLimitBps = burstLimitValue * (burstLimitUnit === 'M' ? 1000000 : 1000);
-
-            // Calculate Burst Threshold
-            const burstThresholdBps = Math.round(0.75 * maxLimitBps);
-
-            // Format for display
-            const formatBps = (bps) => {
-                if (bps >= 1000000) return (bps / 1000000) + 'M';
-                if (bps >= 1000) return (bps / 1000) + 'k';
-                return bps;
-            };
-
-            const maxLimitFormatted = `${maxLimitValue}${maxLimitUnit}`;
-            const burstLimitFormatted = `${burstLimitValue}${burstLimitUnit}`;
-            const burstThresholdFormatted = formatBps(burstThresholdBps);
-
-            // Generate command
-            const command = `/queue simple add name=queue-burst-test target=192.168.88.254 \\
-    max-limit=${maxLimitFormatted}/${maxLimitFormatted} \\
-    burst-limit=${burstLimitFormatted}/${burstLimitFormatted} \\
-    burst-threshold=${burstThresholdFormatted}/${burstThresholdFormatted} \\
-    burst-time=${burstTime}s/${burstTime}s`;
-
-            // Display command
-            document.getElementById('result-command').textContent = command;
-        }
-
-        function copyCommand() {
-            const commandDiv = document.getElementById('result-command');
-            const commandText = commandDiv.textContent;
-            if (!commandText) return;
-
-            navigator.clipboard.writeText(commandText).then(() => {
-                const copyBtn = document.getElementById('copy-btn');
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Disalin!';
-                copyBtn.classList.add('copied');
-                
-                setTimeout(() => {
-                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Salin';
-                    copyBtn.classList.remove('copied');
-                }, 2000);
-            });
-        }
-
-        // Initial calculation on page load
-        document.addEventListener('DOMContentLoaded', calculateBurst);
-    </script>
-
-</body>
-</html>
+            const max
