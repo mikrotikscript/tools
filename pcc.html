@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Generate MikroTik RouterOS scripts for PCC (Per Connection Classifier) Load Balancing.">
-    <link rel="shortcut icon" href="https://mikrotikscript.github.io/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="https://mikrotiktool.github.io/favicon.ico" type="image/x-icon">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -236,4 +236,57 @@
             }
             
             for (let i = 0; i < count; i++) {
-                script += `add chain=output connection-mark=!ISP${i+1}_conn per-connection-classifier=both-addresses:${count}/${i} action=mark-connection new-connection-mark=ISP${i+1
+                script += `add chain=output connection-mark=!ISP${i+1}_conn per-connection-classifier=both-addresses:${count}/${i} action=mark-connection new-connection-mark=ISP${i+1}_conn\n`;
+            }
+            
+            script += `add chain=prerouting in-interface=bridge-local per-connection-classifier=both-addresses:${count}/0 action=mark-connection new-connection-mark=ISP1_conn\n`;
+            script += `add chain=prerouting in-interface=bridge-local per-connection-classifier=both-addresses:${count}/1 action=mark-connection new-connection-mark=ISP2_conn\n`;
+            if (count >= 3) script += `add chain=prerouting in-interface=bridge-local per-connection-classifier=both-addresses:${count}/2 action=mark-connection new-connection-mark=ISP3_conn\n`;
+            if (count >= 4) script += `add chain=prerouting in-interface=bridge-local per-connection-classifier=both-addresses:${count}/3 action=mark-connection new-connection-mark=ISP4_conn\n`;
+            if (count >= 5) script += `add chain=prerouting in-interface=bridge-local per-connection-classifier=both-addresses:${count}/4 action=mark-connection new-connection-mark=ISP5_conn\n`;
+
+            for (let i = 1; i <= count; i++) {
+                script += `add chain=output connection-mark=ISP${i}_conn action=mark-routing new-routing-mark=ke_ISP${i}\n`;
+                script += `add chain=prerouting in-interface=bridge-local connection-mark=ISP${i}_conn action=mark-routing new-routing-mark=ke_ISP${i}\n`;
+            }
+
+            // NAT Rules
+            script += "\n/ip firewall nat\n";
+             for (let i = 1; i <= count; i++) {
+                const iface = document.getElementById(`interface${i}`).value;
+                 script += `add chain=srcnat out-interface=${iface} action=masquerade\n`;
+            }
+
+            // Route Rules
+            script += "\n/ip route\n";
+            for (let i = 1; i <= count; i++) {
+                const gateway = document.getElementById(`gateway${i}`).value;
+                script += `add gateway=${gateway} distance=1 check-gateway=ping routing-mark=ke_ISP${i}\n`;
+            }
+             for (let i = 1; i <= count; i++) {
+                const gateway = document.getElementById(`gateway${i}`).value;
+                 script += `add gateway=${gateway} distance=${i} check-gateway=ping\n`;
+            }
+
+            document.getElementById('script-result').value = script;
+        }
+
+        function copyScript() {
+            const textarea = document.getElementById('script-result');
+            if (!textarea.value) return;
+            textarea.select();
+            document.execCommand('copy');
+            const copyBtn = document.getElementById('copy-btn');
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> Disalin!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Salin';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        }
+
+        document.addEventListener('DOMContentLoaded', updateIspFields);
+    </script>
+
+</body>
+</html>
